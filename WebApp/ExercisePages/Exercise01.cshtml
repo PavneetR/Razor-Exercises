@@ -22,6 +22,12 @@
 
 @section banner {
     <h1>@Page.Title</h1>
+
+}
+@{
+
+    string choices = "";
+    <p>Please select the meal entries of your choice</p>
 }
 
 <!-- determine if the page is a postback or not-->
@@ -34,9 +40,11 @@
     //IF you have multiple buttons on your form, you SHOULD
     //determine which button was pressed; thus; dictating WHICH
     //logic is to be EXECUTED
+
     if (thebutton.Equals("submit"))
     {
         //the Press Me button was pressed
+
         if (string.IsNullOrEmpty(myname))
         {
             <p style="color:firebrick">You don't have a name?</p>
@@ -45,12 +53,45 @@
         {
             <p>Hello there @myname</p>
         }
+
     }
     else
     {
         //the Reset button was pressed
         myname = "";
         <p>You pressed the Reset button</p>
+    }
+    choices = Request.Form["GameGroup"];
+    if (thebutton.Equals("reset"))
+    {
+        @*<p>You pressed the Reset button.</p>*@
+        choices = "";
+    }
+    else
+    {
+        if (choices.IsEmpty())
+        {
+            <p style="color:firebrick">You don't like food?</p>
+            choices = "";
+        }
+        else
+        {
+            <p>@choices</p>
+            var choicesarray = choices.Split(',');
+            for (int i = 0; i < choicesarray.Length; i++)
+            {
+                <p>Choice @i: @choicesarray[i]</p>
+            }
+            <p>
+                @myname I see that you have the following meal entries:
+                <ul>
+                    @foreach (var platform in choices.Split(','))
+                    {
+                        <li>@platform</li>
+                    }
+                </ul>
+            </p>
+        }
     }
 }
 else
@@ -65,19 +106,38 @@ else
         <div class="offset-1">
             <label id="label1" for="dataentry">Customer Name:</label>&nbsp;&nbsp;
             <input type="text" id="dataentry" name="dataentry" value="@myname" />
-            <br /><br />
-            <button type="submit" id="theButton" name="theButton"
-                    value="submit" class="btn btn-primary">
-                Submit
-            </button>&nbsp;&nbsp;
-            <button type="submit" id="theButton" name="theButton"
-                    value="reset" class="btn btn-light">
-                Reset
-            </button>
+            <div class="row">
+                <div class="offset-5">
+                    <label id="lblGameGroup">Choice your meal items</label><br />
+                    <input type="checkbox" id="GameGroup" name="GameGroup" value="Steak"
+                           @*@(Array.IndexOf(choices.Split(','), "PS4") >= 0 ? "checked" : "")*@ />Steak<br />
+                    <input type="checkbox" id="GameGroup" name="GameGroup" value="Seafood"
+                           @*@(Array.IndexOf(choices.Split(','), "Computer") >= 0 ? "checked" : "")*@ />Seafood<br />
+                    <input type="checkbox" id="GameGroup" name="GameGroup" value="Vegatables"
+                           @*@(Array.IndexOf(choices.Split(','), "XBOX One") >= 0 ? "checked" : "")*@ />Vegatables<br />
+
+                </div>
+            </div>
+            <div class="row">
+                <br /><br />
+                <button type="submit" id="theButton" name="theButton"
+                        value="submit" class="btn btn-primary">
+
+
+                    Submit
+                </button>&nbsp;&nbsp;
+                <button type="submit" id="theButton" name="theButton"
+                        value="reset" class="btn btn-light">
+                    Reset
+                </button>
+
+            </div>
         </div>
-    </div>
+
 </form>
-/* --------------*/
+
+
+
 
 
 
