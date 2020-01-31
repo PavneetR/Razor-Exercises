@@ -27,7 +27,7 @@
 @{
 
     string choices = "";
-    <p>Please select the meal entries of your choice</p>
+
 }
 
 <!-- determine if the page is a postback or not-->
@@ -51,7 +51,7 @@
         }
         else
         {
-            <p>Hello there @myname</p>
+            @*<p>Hello there @myname</p>*@
         }
 
     }
@@ -76,21 +76,28 @@
         }
         else
         {
-            <p>@choices</p>
+            @*<p>@choices</p>*@
             var choicesarray = choices.Split(',');
             for (int i = 0; i < choicesarray.Length; i++)
             {
-                <p>Choice @i: @choicesarray[i]</p>
+                @*<p>Choice @i: @choicesarray[i]</p>*@
             }
-            <p>
-                @myname I see that you have the following meal entries:
-                <ul>
-                    @foreach (var platform in choices.Split(','))
-                    {
-                        <li>@platform</li>
-                    }
-                </ul>
-            </p>
+            if (string.IsNullOrEmpty(myname))
+            {
+                @*<p>You didnt enter your name</p>*@
+            }
+            else
+            {
+                <p>
+                    hello @myname, I see that you have the following meal entries:
+                    <ul>
+                        @foreach (var platform in choices.Split(','))
+                        {
+                            <li>@platform</li>
+                        }
+                    </ul>
+                </p>
+            }
         }
     }
 }
@@ -99,15 +106,16 @@ else
     // use to initialize items on your form BEFORE it is sent
     // to the user for the FIRST time.
     <p>IsPost = false</p>
+    <p>Please select the meal entries of your choice</p>
 }
 
 <form id="theform" method="post">
-    <div class="row">
-        <div class="offset-1">
+    <div class="col">
+        <div class="offset-">
             <label id="label1" for="dataentry">Customer Name:</label>&nbsp;&nbsp;
             <input type="text" id="dataentry" name="dataentry" value="@myname" />
-            <div class="row">
-                <div class="offset-5">
+            <div class="col">
+                <div class="offset-2">
                     <label id="lblGameGroup">Choice your meal items</label><br />
                     <input type="checkbox" id="GameGroup" name="GameGroup" value="Steak"
                            @*@(Array.IndexOf(choices.Split(','), "PS4") >= 0 ? "checked" : "")*@ />Steak<br />
