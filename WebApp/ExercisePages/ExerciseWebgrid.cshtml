@@ -11,7 +11,7 @@
     //check that you actually retreived data
     if (string.IsNullOrEmpty(cid))
     {
-        Response.Redirect("Exercise02C.cshtml");
+        Response.Redirect("Exercise02B.cshtml");
     }
 
     //use data to lookup products
@@ -25,7 +25,7 @@
     //use data to get category name for display heading
     //yes: you could have passed the category name with the category id
     //demonstration of using .QueryValue()
-    var catquery = @"SELECT ArtistId,Name
+    var catquery = @"SELECT Name,ArtistId
     FROM Artists
     WHERE ArtistId = @0";
     var catname = db.QueryValue(catquery, cid);
