@@ -23,7 +23,7 @@
     FROM Artists
 
     ORDER BY Name ";
-    var catinfo = db.Query(sqlcommand1, par);
+    var catinfo = db.Query(sqlcommand1, partialstring);
 
     List<SelectListItem> items1 = new List<SelectListItem>();
     foreach (var i in catinfo)
