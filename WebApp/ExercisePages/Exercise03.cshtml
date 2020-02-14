@@ -13,27 +13,24 @@
     var supplierquery = "SELECT ArtistId, Name "
             + "FROM Artists "
             + "Order by Name";
-    var categoryquery = @"SELECT ArtistId, Name "
-            + "FROM Artists "
-            + "Order by Name";
-    var supplierlist = db.Query(supplierquery);
-    var categorylist = db.Query(categoryquery);
+ var supplierlist = db.Query(supplierquery);
+  
 
     //these are validator controls execute on the server side
 
     Validation.Add("Title",
          Validator.Required("Title is required"),
-          Validator.StringLength(160, 1, "Product name is limited to 160 characters"));
+          Validator.StringLength(160, 1, "Title name is limited to 160 characters"));
 
-    Validation.Add("Artists",
+    Validation.Add("Artist",
          Validator.Range(1,10000,"Artist is required"));
 
 
-    Validation.Add("Year",
+    Validation.Add("ReleaseYear",
         
         Validator.Range(1950,DateTime.Today.Year,"Year is out of range,1950 to today"));
 
-    Validation.Add("Label",
+    Validation.Add("ReleaseLabel",
         
          Validator.StringLength(50, 0, "Product name is limited to 50 characters"));
 
@@ -53,8 +50,8 @@
         {
             Title = Request.Form["Title"];
             ArtistId = Request.Form["Artist"];
-            ReleaseYear = Request.Form["Year"];
-            ReleaseLabel = Request.Form["Label"];
+            ReleaseYear = Request.Form["ReleaseYear"];
+            ReleaseLabel = Request.Form["ReleaseLabel"];
 
             var thebutton = Request.Form["FormButton"];
 
@@ -74,13 +71,13 @@
                     try
                     {
                         var inscommand = "INSERT INTO Albums "
-                            + "(Title, ReleaseYear, ReleaseLabel) "
+                            + "(Title, ArtistId, ReleaseYear, ReleaseLabel) "
                             + "VALUES(@0, @1, @2, @3)";
                         db.Execute(inscommand, Title,
-                            ArtistId.Equals("0") ? null : ArtistId,
-                            ReleaseYear.Equals("1950") ? null : ReleaseYear,
-                            string.IsNullOrEmpty(ReleaseLabel) ? null : ReleaseLabel,
-                string.IsNullOrEmpty(ReleaseYear) ? null : ReleaseYear);
+                            ArtistId,
+                           ReleaseYear,
+                            ReleaseLabel);
+               
 
 
                 <div class="col-12 text-center">
@@ -114,10 +111,10 @@ else
             <input type="text" name="Title" value="@Title" />
         </div><br />
         <div class="col text-right">
-            <label id="lblSupplierList" for="ArtistId">Artist</label>
+            <label id="lblArtist" for="ArtistId">Artist</label>
         </div>
         <div class="col text-left">
-            <select name="SupplierList">
+            <select name="Artist">
                 <option value="0">select...</option>
                 @foreach (var acollectionrow in supplierlist)
                 {
@@ -135,10 +132,10 @@ else
         
 
         <div class="col text-right">
-            <label id="lblQuantityPerUnit" for="ReleaseYear">Year</label>
+            <label id="lblReleaseYear" for="ReleaseYear">Year</label>
         </div>
         <div class="col text-left">
-            <input type="number" name="ReleaseYear" value="@ReleaseYear"  />
+            <input type="number" name="ReleaseYear" value="@ReleaseYear" />
         </div><br />
         <div class="col text-right">
             <label id="lblReleaseLabel" for="ReleaseLabel">Label</label>
