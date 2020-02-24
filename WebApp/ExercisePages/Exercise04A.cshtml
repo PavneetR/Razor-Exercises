@@ -53,9 +53,9 @@
     }
     var db = Database.Open("CHINOOK");
 
-    string sqlcommand1 = "SELECT ArtistId, Name FROM Artists WHERE Name LIKE @0 ORDER BY Name";
+    var sqlcommand1 = "SELECT ArtistId,Title FROM Albums WHERE Title LIKE @0 ORDER BY Title";
     var partialstring = "%" + Title + "%";
-    var results = db.Query(sqlcommand1, partialstring);
+    var results = db.QuerySingle(sqlcommand1, partialstring,pid);
 
     if (results == null)
     {
@@ -73,63 +73,198 @@
 }
 @if (IsPost)
 {
-    try
+    if(thebutton.Equals("backtosearch"))
     {
-
-
-        if (thebutton.Equals("unavailable"))
-        {
-            var sqlcommand = "UPDATE Albums SET "
-                                + "Discontinued = 1 "
-                                + "WHERE ArtistId = @0";
-            var rowsaffected = db.Execute(sqlcommand, ArtistId);
-            if (rowsaffected > 0)
-            {
-                unavailable = "1";
-                message = "Product has been DISCONTINUED";
-            }
-            else
-            {
-                message = "Artist NOT found";
-            }
-        }
-        else if(thebutton.Equals("update"))
-        {
-            var sqlcommand = "UPDATE Albums SET"
-                + "Title = @0,"
-                + "ArtistId = @1,"
-                + "ReleaseYear = @2,"
-                + "ReleaseLabel = @3,"
-                + "unavailable = @4 "
-                + "WHERE AlbumId = @5";
-            var rowsaffected = db.Execute(sqlcommand, Title,
-                 ArtistId,
-                          ReleaseYear,
-                           ReleaseLabel,unavailable);
-            if (rowsaffected > 0)
-            {
-                message = "Product has been UPDATED";
-
-            }
-            else
-            {
-                message = "Product NOT found";
-            }
-        }
-        else if(thebutton.Equals("delete"))
-        {
-            var deleteStatement = "DELETE Albums WHERE AlbumId = @0";
-            var rows = 
-        }
+        Response.Redirect("Exercise04B");
     }
-    catch (Exception ex)
+    if (Validation.IsValid())
     {
+        try
+        {
+
+
+            if (thebutton.Equals("unavailable"))
+            {
+                var sqlcommand = "UPDATE Albums SET "
+                                    + "Discontinued = 1 "
+                                    + "WHERE ArtistId = @0";
+                var rowsaffected = db.Execute(sqlcommand, ArtistId);
+                if (rowsaffected > 0)
+                {
+                    unavailable = "1";
+                    message = "Product has been DISCONTINUED";
+                }
+                else
+                {
+                    message = "Artist NOT found";
+                }
+            }
+            else if (thebutton.Equals("update"))
+            {
+                var sqlcommand = "UPDATE Albums SET"
+                    + "Title = @0,"
+                    + "ArtistId = @1,"
+                    + "ReleaseYear = @2,"
+                    + "ReleaseLabel = @3,"
+                    + "unavailable = @4 "
+                    + "WHERE AlbumId = @5";
+                var rowsaffected = db.Execute(sqlcommand, Title,
+                     ArtistId,
+                              ReleaseYear,
+                               ReleaseLabel, unavailable);
+                if (rowsaffected > 0)
+                {
+                    message = "Product has been UPDATED";
+
+                }
+                else
+                {
+                    message = "Product NOT found";
+                }
+            }
+            else if (thebutton.Equals("delete"))
+            {
+                var deleteStatement = "DELETE Albums WHERE AlbumId = @0";
+                var rows = db.Execute(deleteStatement, ArtistId);
+                if (rows == 1)
+                {
+                    message = "Artist has been delted";
+                }
+                else
+                {
+                    message = "Artist not found";
+                }
+                ArtistId = "";
+                Title = "";
+                ReleaseYear = "";
+                ReleaseLabel = "";
+                unavailable = "0";
+            }
+        }
+        catch (Exception ex)
+        {
         <div class="col-12 text-center">
             <p style="color:firebrick; font-size:large">
                 Processing error: @ex.Message
             </p>
         </div>
+        }
     }
 }
+else
+{
+    if(message != "Artist not found")
+    {
+        ArtistId = results.ArtistId.ToString();
+        Title = results.Title;
+        ReleaseYear = results.ReleaseYear;
+        ReleaseLabel = results.ReleaseLabel;
+        unavailable = results.unavailable.ToString();
+    }
+}
+@Html.ValidationSummary()
+
+<form id="theForm" action="" method="post">
+    <div class="row row-cols-2">
+        <div class="col text-right">
+            <label id="lblTitle" for="Title">Title</label>
+        </div>
+        <div class="col text-left">
+            <input type="text" name="Title" value="@Title" />
+        </div><br />
+        <div class="col text-right">
+            <label id="lblArtist" for="ArtistId">Artist</label>
+        </div>
+        <div class="col text-left">
+            <select name="Artist">
+                <option value="0">select...</option>
+                @foreach (var acollectionrow in results)
+                {
+                    if (acollectionrow.ArtistId.ToString() == ArtistId)
+                    {
+                        <option value="@acollectionrow[0]" selected>@acollectionrow[1]</option>
+                    }
+                    else
+                    {
+                        <option value="@acollectionrow[0]">@acollectionrow[1]</option>
+                    }
+                }
+            </select>
+        </div><br />
+
+
+        <div class="col text-right">
+            <label id="lblReleaseYear" for="ReleaseYear">Year</label>
+        </div>
+        <div class="col text-left">
+            <input type="number" name="ReleaseYear" value="@ReleaseYear" />
+        </div><br />
+        <div class="col text-right">
+            <label id="lblReleaseLabel" for="ReleaseLabel">Label</label>
+        </div>
+        <div class="col text-left">
+            <input type="text" name="ReleaseLabel" value="@ReleaseLabel" />
+        </div><br />
+
+
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+            <input type="submit" id="FormButton" name="FormButton"
+                   class="btn btn-primary" value="Add" />
+            <input type="submit" id="FormButton" name="FormButton" formnovalidate
+                   class="btn" value="Clear" />
+        </div>
+
+    </div>
+    div class="col text-right">
+    <label id="lblunavailable" for="Discontinued">Unavailable</label>
+    
+    <div class="col text-left">
+        @if (unavailable.Equals("True") || (unavailable == "1"))
+        {
+            <input type="checkbox" name="Discontinued" checked value="1" />
+        }
+        else
+        {
+            <input type="checkbox" name="Discontinued" value="0" />
+        }
+    </div><br />
+   
+    <div class="row">
+        <div class="col-12 text-center">
+            <button type="submit" name="theButton" id="theUpdate" class="btn btn-primary"
+                    value="update">
+                Update
+            </button>&nbsp;&nbsp;&nbsp;
+            <button type="submit" name="theButton" id="theDiscontinue" class="btn btn-primary" formnovalidate
+                    value="discontinue">
+                Discontinue
+            </button>&nbsp;&nbsp;&nbsp;
+            <button type="submit" name="theButton" id="theDelete" class="btn btn-primary" formnovalidate
+                    value="delete">
+                Delete Record
+            </button>&nbsp;&nbsp;&nbsp;
+            <button type="submit" name="theButton" id="theCancel" class="btn btn-primary" formnovalidate
+                    value="backtosearch">
+                Back to Search
+            </button>
+        </div>
+    </div>
+    @* confirmation can be done on a button click using javascript
+        we will ask the user to confirm the discontinuing of a product*@
+    <script type="text/javascript">
+        document.getElementById("theDiscontinue").onclick = ConfirmDiscontinue;
+        function ConfirmDiscontinue() {
+            return confirm("Are you sure you want to DISCONTINUE @Title?");
+        }
+        document.getElementById("theDelete").onclick = ConfirmDelete;
+        function ConfirmDelete() {
+            return confirm("Are you sure you want to DELETE @Title?");
+        }
+    </script>
+</form>
+
+
 
 
