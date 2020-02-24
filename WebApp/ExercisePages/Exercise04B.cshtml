@@ -2,10 +2,10 @@
     Layout = "~/_Layout.cshtml";
     Page.Title = string.Format("Exercise 4");
 
-    var productsearch = Request.Form["ProductSearch"];
+    var Artistsearch = Request.Form["ArtistSearch"];
 
     var db = Database.Open("CHINOOK");
-    var partialsearchstring = "%" + productsearch + "%";
+    var partialsearchstring = "%" + Artistsearch + "%";
 
     var queryStatement = @"SELECT ArtistId, Title,ReleaseYear,ReleaseLabel FROM Albums WHERE Title LIKE @0 ORDER BY Title";
     var queryProducts = db.Query(queryStatement, partialsearchstring);
@@ -14,15 +14,15 @@
 
 <form id="theForm" action="" method="post">
     <div class="col-sm-3">
-        <label id="forProductSearch">Title</label><br />
-        <input type="text" name="ProductSearch" value="@productsearch"><br /><br />
+        <label id="forArtistSearch">Title</label><br />
+        <input type="text" name="ArtistSearch" value="@Artistsearch"><br /><br />
         <button type="submit" class="btn btn-primary" name="Search" id="theSearch">Search</button>
     </div><br />
 </form>
 <div class="col-sm-8">
     @if (IsPost)
     {
-        if (productsearch.IsEmpty())
+        if (Artistsearch.IsEmpty())
         {
             <p><strong><span style="color:firebrick">Enter a titlr name (or partial name).</span></strong></p>
         }
@@ -35,7 +35,7 @@
             }
             else
             {
-                Response.Redirect("Exercise04C.cshtml?pid=" + productsearch);
+                Response.Redirect("Exercise04C.cshtml?pid=" + Artistsearch);
             }
         }
     }

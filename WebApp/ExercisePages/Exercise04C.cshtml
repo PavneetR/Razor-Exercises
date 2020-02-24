@@ -12,7 +12,7 @@
 
     var db = Database.Open("CHINOOK");
     var partialstring = "%" + pid + "%";
-    var prodquery = @"SELECT ArtistId, Title,ReleaseYear,ReleaseLabel FROM Albums WHERE Title LIKE @0 ORDER BY Title";
+    var prodquery = @"SELECT AlbumId, ArtistId, Title,ReleaseYear,ReleaseLabel FROM Albums WHERE Title LIKE @0 ORDER BY Title";
     var prodinfo = db.Query(prodquery, partialstring);
 
     var grid = new WebGrid(prodinfo, rowsPerPage: 5);
@@ -30,7 +30,7 @@
             grid.Column(columnName: "ReleaseYear", header: "Year"),
             grid.Column(columnName: "ReleaseLabel", header: "Label"),
             
-            grid.Column(header: "", format: @<text><a href="~/ExercisePages/Exercise04A.cshtml?pid=@item.ArtistId">Edit</a></text>)));
+            grid.Column(header: "", format: @<text><a href="~/ExercisePages/Exercise04A.cshtml?pid=@item.AlbumId">Edit</a></text>)));
     </div>
 </div>
 

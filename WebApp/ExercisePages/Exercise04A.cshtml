@@ -12,7 +12,7 @@
     var ArtistId = Request.Form["ArtistId"];
     var ReleaseYear = Request.Form["ReleaseYear"];
     var ReleaseLabel = Request.Form["ReleaseLabel"];
-    var unavailable = Request.Form["unavailable"];
+    var AlbumId = Request.QueryString["pid"];
 
     var thebutton = Request.Form["theButton"];
 
@@ -22,7 +22,7 @@
         Validator.Required("Title is required"),
          Validator.StringLength(160, 1, "Title name is limited to 160 characters"));
 
-    Validation.Add("Artist",
+    Validation.Add("ArtistId",
          Validator.Range(1, 10000, "Artist is required"));
 
 
@@ -36,26 +36,28 @@
 
     if (IsPost)
     {
-        if (unavailable == null)
+        if (AlbumId == null)
         {
-            unavailable = "0";
+            AlbumId = "0";
         }
-        else
-        {
-            unavailable = "1";
-        }
+        //else
+        //{
+        //    AlbumId = "0";
+        //}
     }
     else
     {
         ArtistId = pid;
-        unavailable = "0";
+        AlbumId = "0";
 
     }
     var db = Database.Open("CHINOOK");
+    var ArtistSearch = @"Select ArtistId,Name from artists";
+    var ArtistResult = db.Query(ArtistSearch);
 
-    var sqlcommand1 = "SELECT ArtistId,Title FROM Albums WHERE Title LIKE @0 ORDER BY Title";
-    var partialstring = "%" + Title + "%";
-    var results = db.QuerySingle(sqlcommand1, partialstring,pid);
+    var sqlcommand1 = "SELECT ArtistId,Title,ReleaseYear,ReleaseLabel FROM Albums WHERE AlbumId = @0";
+    //var partialstring = "%" + Title + "%";
+    var results = db.QuerySingle(sqlcommand1, pid);
 
     if (results == null)
     {
@@ -73,7 +75,7 @@
 }
 @if (IsPost)
 {
-    if(thebutton.Equals("backtosearch"))
+    if (thebutton.Equals("backtosearch"))
     {
         Response.Redirect("Exercise04B");
     }
@@ -83,7 +85,7 @@
         {
 
 
-            if (thebutton.Equals("unavailable"))
+            if (thebutton.Equals("AlbumId"))
             {
                 var sqlcommand = "UPDATE Albums SET "
                                     + "Discontinued = 1 "
@@ -91,7 +93,7 @@
                 var rowsaffected = db.Execute(sqlcommand, ArtistId);
                 if (rowsaffected > 0)
                 {
-                    unavailable = "1";
+                    AlbumId = "1";
                     message = "Product has been DISCONTINUED";
                 }
                 else
@@ -101,20 +103,16 @@
             }
             else if (thebutton.Equals("update"))
             {
-                var sqlcommand = "UPDATE Albums SET"
-                    + "Title = @0,"
-                    + "ArtistId = @1,"
-                    + "ReleaseYear = @2,"
-                    + "ReleaseLabel = @3,"
-                    + "unavailable = @4 "
-                    + "WHERE AlbumId = @5";
+                var sqlcommand = "UPDATE Albums SET Title = @0, ArtistId = @1, ReleaseYear = @2, ReleaseLabel = @3  WHERE AlbumId = @4";
                 var rowsaffected = db.Execute(sqlcommand, Title,
                      ArtistId,
                               ReleaseYear,
-                               ReleaseLabel, unavailable);
+                               ReleaseLabel,
+                               AlbumId);
                 if (rowsaffected > 0)
                 {
-                    message = "Product has been UPDATED";
+                    <p>Product has been UPDATED</p>
+
 
                 }
                 else
@@ -124,11 +122,12 @@
             }
             else if (thebutton.Equals("delete"))
             {
-                var deleteStatement = "DELETE Albums WHERE AlbumId = @0";
-                var rows = db.Execute(deleteStatement, ArtistId);
+                var deleteStatement = "DELETE from Albums WHERE AlbumId = @0";
+                var rows = db.Execute(deleteStatement, AlbumId);
                 if (rows == 1)
                 {
-                    message = "Artist has been delted";
+                   // message = "Artist has been delted";
+                    <p>Artist has been deleted</p>
                 }
                 else
                 {
@@ -138,28 +137,28 @@
                 Title = "";
                 ReleaseYear = "";
                 ReleaseLabel = "";
-                unavailable = "0";
+                AlbumId = "0";
             }
         }
         catch (Exception ex)
         {
-        <div class="col-12 text-center">
-            <p style="color:firebrick; font-size:large">
-                Processing error: @ex.Message
-            </p>
-        </div>
+            <div class="col-12 text-center">
+                <p style="color:firebrick; font-size:large">
+                    Processing error: @ex.Message
+                </p>
+            </div>
         }
     }
 }
 else
 {
-    if(message != "Artist not found")
+    if (message != "Artist not found")
     {
         ArtistId = results.ArtistId.ToString();
         Title = results.Title;
-        ReleaseYear = results.ReleaseYear;
+        ReleaseYear = results.ReleaseYear.ToString();
         ReleaseLabel = results.ReleaseLabel;
-        unavailable = results.unavailable.ToString();
+
     }
 }
 @Html.ValidationSummary()
@@ -176,9 +175,9 @@ else
             <label id="lblArtist" for="ArtistId">Artist</label>
         </div>
         <div class="col text-left">
-            <select name="Artist">
+            <select name="ArtistId">
                 <option value="0">select...</option>
-                @foreach (var acollectionrow in results)
+                @foreach (var acollectionrow in ArtistResult)
                 {
                     if (acollectionrow.ArtistId.ToString() == ArtistId)
                     {
@@ -217,30 +216,16 @@ else
         </div>
 
     </div>
-    div class="col text-right">
-    <label id="lblunavailable" for="Discontinued">Unavailable</label>
-    
-    <div class="col text-left">
-        @if (unavailable.Equals("True") || (unavailable == "1"))
-        {
-            <input type="checkbox" name="Discontinued" checked value="1" />
-        }
-        else
-        {
-            <input type="checkbox" name="Discontinued" value="0" />
-        }
-    </div><br />
-   
+
+
+
     <div class="row">
         <div class="col-12 text-center">
             <button type="submit" name="theButton" id="theUpdate" class="btn btn-primary"
                     value="update">
                 Update
             </button>&nbsp;&nbsp;&nbsp;
-            <button type="submit" name="theButton" id="theDiscontinue" class="btn btn-primary" formnovalidate
-                    value="discontinue">
-                Discontinue
-            </button>&nbsp;&nbsp;&nbsp;
+
             <button type="submit" name="theButton" id="theDelete" class="btn btn-primary" formnovalidate
                     value="delete">
                 Delete Record
@@ -254,10 +239,7 @@ else
     @* confirmation can be done on a button click using javascript
         we will ask the user to confirm the discontinuing of a product*@
     <script type="text/javascript">
-        document.getElementById("theDiscontinue").onclick = ConfirmDiscontinue;
-        function ConfirmDiscontinue() {
-            return confirm("Are you sure you want to DISCONTINUE @Title?");
-        }
+
         document.getElementById("theDelete").onclick = ConfirmDelete;
         function ConfirmDelete() {
             return confirm("Are you sure you want to DELETE @Title?");
